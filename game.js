@@ -552,8 +552,8 @@ function animateNumber(element, deltaElement, startValue, endValue, deltaValue, 
 }
 
 const MAX_HISTORY = 30;
-const ROUND_DURATION = 10;
-const BETWEEN_ROUND_DELAY = 3000;
+const ROUND_DURATION = 9;
+const BETWEEN_ROUND_DELAY = 2800;
 const SAME_CHOICE_REWARD_TARGET = 10;
 const SAME_CHOICE_REWARD_POINTS = 1;
 let startPrice = 0;
