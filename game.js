@@ -575,6 +575,8 @@ let sameChoicePressCount = 0;
 let sameChoicePressDirection = null;
 let sameChoiceRewardClaimed = false;
 let lastShareOfferAt = window.AppStorage.getNumber(window.AppStorage.keys.lastShareOfferAt, 0);
+let sessionRoundsPlayed = 0;
+let sessionBestStreak = streak;
 
 const DOM = {
   price: document.getElementById("price"),
@@ -974,6 +976,8 @@ window.addEventListener("keydown", (event) => {
   toggleDebugMode();
 });
 
+window.addEventListener("pagehide", trackSessionExit);
+
 initializeDebugMode();
 updateSoundToggleUI();
 
@@ -989,6 +993,23 @@ async function getPrice() {
 
 function setStatus(text) {
   DOM.status.innerText = text;
+}
+
+function trackAnalyticsEvent(eventName, params = {}) {
+  if (typeof window.gtag !== "function") {
+    return;
+  }
+
+  window.gtag("event", eventName, params);
+}
+
+function trackSessionExit() {
+  trackAnalyticsEvent("session_exit", {
+    rounds_played: sessionRoundsPlayed,
+    current_streak: streak,
+    best_streak: Math.max(sessionBestStreak, bestStreak, streak),
+    rating,
+  });
 }
 
 function resetSameChoiceRewardState() {
@@ -1162,6 +1183,12 @@ function choose(direction) {
   sameChoicePressDirection = direction;
   sameChoicePressCount = 1;
   window.AppSounds?.play("click");
+  trackAnalyticsEvent("prediction", {
+    direction,
+    round_id: currentRoundId,
+    streak,
+    rating,
+  });
   DOM.upBtn.classList.add("choice-locked");
   DOM.downBtn.classList.add("choice-locked");
 
@@ -1257,7 +1284,24 @@ async function runTimer() {
     bestStreak = streak;
       window.AppStorage.setNumber(window.AppStorage.keys.bestStreak, bestStreak);
   }
+  sessionRoundsPlayed += 1;
+  sessionBestStreak = Math.max(sessionBestStreak, streak, bestStreak);
   DOM.bestStreak.textContent = String(bestStreak);
+
+  trackAnalyticsEvent("round_complete", {
+    outcome: roundOutcome,
+    prediction: choice || "none",
+    market_direction: marketDirection,
+    rounds_played: sessionRoundsPlayed,
+    streak,
+    best_streak: Math.max(sessionBestStreak, bestStreak),
+    rating,
+  });
+  trackAnalyticsEvent("streak", {
+    value: streak,
+    outcome: roundOutcome,
+    rounds_played: sessionRoundsPlayed,
+  });
 
   const resultClass = roundOutcome === RESULTS.CORRECT
     ? "result-success"
