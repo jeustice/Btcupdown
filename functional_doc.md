@@ -1,7 +1,7 @@
 # BTC Up Down — Functional Documentation
 
 ## 1. Purpose
-BTC Live Market is a browser-based prediction game where the player must guess whether the Bitcoin price will go **up** or **down** over a short round.
+BTC Up Down is a browser-based prediction game where the player must guess whether the Bitcoin price will go **up** or **down** over a short round.
 
 The goal is to create a fast, replayable gameplay loop built around:
 - quick decision-making,
